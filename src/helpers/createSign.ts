@@ -1,16 +1,43 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import jsMd5 from "js-md5";
+function removeFileTypesFromJSON(json: any): any {
+  if (typeof json === "object" && json !== null) {
+    if (json instanceof File) {
+      return undefined;
+    }
+
+    if (Array.isArray(json)) {
+      return json.map((item) => removeFileTypesFromJSON(item));
+    }
+
+    const result: any = {};
+
+    for (const key in json) {
+      const value = json[key];
+      const newValue = removeFileTypesFromJSON(value);
+
+      if (typeof newValue !== "undefined") {
+        result[key] = newValue;
+      }
+    }
+
+    return result;
+  }
+
+  return json;
+}
 
 export const createSign = (
   params: Record<string, any>,
   key: string
 ): string => {
-  const sortedParams = params
-    ? Object.keys(params)
-        .filter((key) => params[key] !== "")
+  const data = removeFileTypesFromJSON(params);
+  const sortedParams = data
+    ? Object.keys(data)
+        .filter((key) => data[key] !== "")
         .sort()
         .reduce((result: any, key) => {
-          result[key] = params[key];
+          result[key] = data[key];
           return result;
         }, {})
     : null;
