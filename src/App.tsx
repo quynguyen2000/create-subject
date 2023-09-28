@@ -259,7 +259,7 @@ const App: React.FC = () => {
                 style={{ marginTop: "3rem" }}
               >
                 <Input
-                  placeholder="Nhận tên nhân viên"
+                  placeholder="Nhập tên nhân viên"
                   value={name}
                   onChange={(value) => setName(value.target.value)}
                 />
