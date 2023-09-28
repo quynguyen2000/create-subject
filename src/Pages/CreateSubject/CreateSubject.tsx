@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import {
@@ -17,10 +17,9 @@ import {
 } from "antd";
 import type { UploadChangeParam } from "antd/es/upload";
 import type { RcFile, UploadFile, UploadProps } from "antd/es/upload/interface";
-import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { createSign } from "../../helpers/createSign";
+import { instanceBase } from "../../helpers/axios";
 import "./CreateSubject.css";
 
 const getBase64 = (img: RcFile, callback: (url: string) => void) => {
@@ -29,13 +28,16 @@ const getBase64 = (img: RcFile, callback: (url: string) => void) => {
   reader.readAsDataURL(img);
 };
 
-const CreateSubject: React.FC = () => {
+type Props = {
+  //   setIsExpire: (a: boolean) => void;
+};
+
+const CreateSubject: React.FC<Props> = () => {
   const [form] = Form.useForm();
 
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<any>();
   const [subjectImg, setSubjectImg] = useState<any>();
-  const [token, setToken] = useState<string>();
   const [name, setName] = useState<string>("");
 
   const beforeUpload = (file: RcFile) => {
@@ -72,27 +74,20 @@ const CreateSubject: React.FC = () => {
     </div>
   );
 
-  useEffect(() => {
-    setToken(String(localStorage.getItem("token")));
-  }, [localStorage.getItem("token")]);
-
   const onFinish = async () => {
     const params = {
       subject_type_id: 2,
       store_id: 17,
       name: name,
     };
-    const sign = createSign(params, String(token));
 
-    if (token && sign && subjectImg) {
-      const res = await axios({
+    if (subjectImg) {
+      const res = await instanceBase({
         method: "post",
-        url: "https://digieye.viotgroup.com/phpapi/aiApplication/subject/addSubject",
+        url: "/phpapi/aiApplication/subject/addSubject",
         data: { ...params, subjectImg },
         headers: {
           "Content-Type": "multipart/form-data",
-          Token: token,
-          Sign: sign as any,
         },
       });
 
