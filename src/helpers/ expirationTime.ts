@@ -1,8 +1,9 @@
 export const expiration = (expiration_time: number): boolean => {
   const currentTime = new Date().getTime();
-  const expirationTime = currentTime + expiration_time;
-  if (currentTime >= expirationTime) {
+
+  if (expiration_time - currentTime > 0) {
+    return false;
+  } else {
     return true;
   }
-  return false;
 };

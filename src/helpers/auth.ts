@@ -11,6 +11,13 @@ export const getToken = async () => {
   const { data } = response;
   if (data) {
     localStorage.setItem("token", data.data.token);
-    localStorage.setItem("expiration_time", data.data.expiration_time);
+    const currentTime = new Date().getTime();
+
+    const expirationTime = data.data.expiration_time;
+
+    localStorage.setItem(
+      "expiration_time",
+      String(currentTime + expirationTime)
+    );
   }
 };

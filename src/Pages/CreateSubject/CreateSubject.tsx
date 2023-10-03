@@ -21,6 +21,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { instanceBase } from "../../helpers/axios";
 import "./CreateSubject.css";
+import { expiration } from "../../helpers/ expirationTime";
+import { getToken } from "../../helpers/auth";
 
 const getBase64 = (img: RcFile, callback: (url: string) => void) => {
   const reader = new FileReader();
@@ -75,34 +77,63 @@ const CreateSubject: React.FC<Props> = () => {
   );
 
   const onFinish = async () => {
+    const expirationTime = Number(localStorage.getItem("expiration_time"));
     const params = {
       subject_type_id: 2,
       store_id: 17,
       name: name,
     };
 
-    if (subjectImg) {
-      const res = await instanceBase({
-        method: "post",
-        url: "/phpapi/aiApplication/subject/addSubject",
-        data: { ...params, subjectImg },
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+    if (expiration(expirationTime)) {
+      await getToken().then(async () => {
+        if (subjectImg) {
+          const res = await instanceBase({
+            method: "post",
+            url: "/phpapi/aiApplication/subject/addSubject",
+            data: { ...params, subjectImg },
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+
+          if (res.data.code !== 1000) {
+            toast.error(res.data.msg);
+          } else {
+            setName("");
+            setImageUrl(null);
+            form.resetFields();
+            toast.success(res.data.msg, {
+              theme: "colored",
+            });
+          }
+
+          return res;
+        }
       });
-
-      if (res.data.code !== 1000) {
-        toast.error(res.data.msg);
-      } else {
-        setName("");
-        setImageUrl(null);
-        form.resetFields();
-        toast.success(res.data.msg, {
-          theme: "colored",
+    } else {
+      if (subjectImg) {
+        const res = await instanceBase({
+          method: "post",
+          url: "/phpapi/aiApplication/subject/addSubject",
+          data: { ...params, subjectImg },
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
-      }
 
-      return res;
+        if (res.data.code !== 1000) {
+          toast.error(res.data.msg);
+        } else {
+          setName("");
+          setImageUrl(null);
+          form.resetFields();
+          toast.success(res.data.msg, {
+            theme: "colored",
+          });
+        }
+
+        return res;
+      }
     }
   };
 
